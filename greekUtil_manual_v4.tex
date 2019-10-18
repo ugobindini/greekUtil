@@ -1,0 +1,201 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[left=3cm, right=3cm]{geometry}
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+\usepackage[italian,english,polutonikogreek]{babel}
+\usepackage[LGR, T1]{fontenc}
+\usepackage{verbatim}
+\usepackage{listings}
+
+\usepackage{hyperref}
+\usepackage{lipsum}
+\usepackage{greekUtil_v3}
+
+\title{User manual for \texttt{greekUtil}, version 3}
+\author{U. Bindini}
+\date{\today}
+
+\begin{document}
+	\selectlanguage{english}
+	\maketitle
+	
+	\section{Introduction}
+	
+	The small package \texttt{greekUtil} was written in order to provide simple and useful commands for typesetting ancient greek and latin filology. For all the greek-specific features it relies on the wonderful package \verb|teubner| by C. Beccari.
+	
+	\section{Commands}
+	
+	\subsection{Basic writing macros}
+	
+	In order to write in (ancient) polytonic greek you may invoke \verb|\g{|\emph{text}\verb|}|\marginpar{\texttt{\textbackslash g}}.
+	
+	In addition, the macro \verb|\boldg[|\emph{boldness}\verb|]{|\emph{text}\verb|}|\marginpar{\texttt{\textbackslash boldg}} gives a bold version. The optional argument \emph{boldness} may be specified in order to obtain a heavier/lighter version (default value is 0.6).\footnote{This is obtained by a fake-bold font created with aid from the package \texttt{pdfrender}. Some printed versions may have unexpected behaviours.}
+	
+	Both inside \verb|\g| and \verb|\boldg| one can use any command from \verb|teubner|; in addition, the macro \verb|\latin{|\emph{text}\verb|}|\marginpar{\texttt{\textbackslash latin}} may be used inside \verb|\g| and \verb|\boldg| in order to print latin letters or short expressions. For anything longer than a single word the usage of \verb|\latin| is not advised.
+	
+	As aliases of the corresponding \verb|teubner| commands, \verb|\b| and \verb|\l|\marginpar{\texttt{\textbackslash b}, \texttt{\textbackslash l}} can be used in place of \verb|\longa| and \verb|\brevis| respectively.
+	
+	The macro \verb|\red{|\emph{text}\verb|}|\marginpar{\texttt{\textbackslash red}} may be used to typeset some text in red color.
+	
+	\subsection{Quotes}
+	
+	Two main macros are defined in order to handle quotes:
+	
+	\medskip
+	
+	\verb|\onequote[|\emph{options}\verb|]{|\emph{text}\verb|}|\marginpar{\texttt{\textbackslash onequote}}
+	
+	\medskip
+    
+	The options must be specified in the form \verb|key=value| separated by commas. The following keys are available:
+	\begin{itemize}
+		\item[\textbf{fontscale}] Fontsize of the text, as a ratio with the preceding fontsize (default: 0.9). A value of 1.0 leaves the fontsize  unchanged.
+		\item[\textbf{top}] Vertical space before the text (default: 0pt).
+		\item[\textbf{middle}] Vertical space between the text and the apparatus (default: 10pt if the apparatus is not empty, 0pt otherwise)
+		\item[\textbf{bottom}] Vertical space after the apparatus (default: 0pt).
+		\item[\textbf{left}] Left margin of the quote (default: equal to twice the first line indentation of a paragraph).
+		\item[\textbf{right}] Right margin of the quote (default: equal to twice the first line indentation of a paragraph).
+	\end{itemize}
+	
+	The second available macro is meant for handling two-columned quotes.
+	
+	\medskip
+	
+	\verb|\twoquote[|\emph{options}\verb|]{|\emph{column1}\verb|}{|\emph{column2}\verb|}| \marginpar{\texttt{\textbackslash twoquote}}
+	
+	\medskip
+	
+	The options must be specified in the form \verb|key=value| separated by commas. The following keys are available:
+	\begin{itemize}
+		\item[\textbf{fontscale}] Fontsize of the text, as a ratio with the preceding fontsize (default: 0.9). A value of 1.0 leaves the fontsize  unchanged.
+		\item[\textbf{top}] Vertical space before the text (default: 0pt).
+		\item[\textbf{middle}] Vertical space between the text and the apparatus (default: 10pt if the apparatus is not empty, 0pt otherwise)
+		\item[\textbf{bottom}] Vertical space after the apparatus (default: 0pt).
+		\item[\textbf{left}] Left margin of the quote (default: equal to the first line indentation of a paragraph).
+		\item[\textbf{right}] Right margin of the quote (default: equal to the first line indentation of a paragraph).
+		\item[\textbf{gap}] Space between the first and the second column (default: equal to the first line indentation of a paragraph).
+		\item[\textbf{ratio}] Ratio of the widths of the two columns (default: 1). A value of 2 means that the widths will be in the ratio 2:1, while a value of 0.5 means that the widths will be in the ratio 1:2.
+	\end{itemize}
+
+  Both in the \verb|\quote| and in the \verb|\twoquote| environments, the command \verb|\appnote[|\emph{line number}\verb|][|\emph{text}\verb|]| may be used in order to insert a note in the critical apparatus. If omitted, the line number is inherited by the line numbering of the environment (see \verb|\poetry| and \verb|\theatre| below). If at least one critical note has been added to the apparatus, the latter will be printed at the bottom of the quote in small font. No page-breaking of the quote is handled.
+	
+	Finally, the command \verb|\apparatus| prints all the current critical notes created with \verb|\appnote|, formatted as in the environments above. Its use is not recommended in general, but may be useful to handle page-breaks.
+	
+	\subsection{Macros for poetry and theatre}
+	
+	There are many macros and environments already available for {\LaTeX} in order to typeset poetry which the user may want to look at. Here we provide the following:
+	
+	\medskip
+	
+	\verb|\poetry[|\emph{options}\verb|]{|\emph{text}\verb|}| \marginpar{\texttt{\textbackslash poetry}}	
+	
+	\medskip
+	
+	The options must be specified in the form \verb|key=value| separated by commas. The following keys are available:
+	\begin{itemize}
+		\item[\textbf{fontscale}] Fontsize of the text, as a ratio with the preceding fontsize (default: 1). A value of 1.0 leaves the fontsize  unchanged.
+		\item[\textbf{top}] Vertical space before the text (default: 0pt).
+		\item[\textbf{bottom}] Vertical space after the text (default: 0pt).
+		\item[\textbf{numbers}] Can be only \verb|true| or \verb|false| (default: false). If \verb|true|, the line numbers are printed right-aligned at the end of the corresponding line.
+		\item[\textbf{firstline}] Number of the first line of the text (default: 1).
+		\item[\textbf{modulo}] Frequency with which the line numbers are printed (default: 5).
+		\item[\textbf{numberpos}] Horizontal position of the line numbers (default: 0pt). Negative values move the numbers towards left, positive values towards right.
+	\end{itemize}
+	
+	For the theatre, we provide the following macro.
+	
+	\medskip
+	
+	\verb|\theatre[|\emph{options}\verb|]{|\emph{text}\verb|}| \marginpar{\texttt{\textbackslash theatre}}	
+	
+	\medskip
+	
+	The options must be specified in the form \verb|key=value| separated by commas. The following keys are available:
+	\begin{description}
+    \item[style] Defines what is the font used for the characters' names. Possible values are \verb|greek| (default, keeps the normal font) and \verb|italian| ({\smaller\scshape smaller and small capitals}).
+		\item[fontscale] Fontsize of the text, as a ratio with the preceding fontsize (default: 1). A value of 1.0 leaves the fontsize  unchanged.
+		\item[top] Vertical space before the text (default: 0pt).
+		\item[bottom] Vertical space after the text (default: 0pt).
+		\item[indent] Horizontal indentation of the text, excluding the characters' names (default: 2em).
+		\item[numbers] Can be only \verb|true| or \verb|false| (default: false). If \verb|true|, the line numbers are printed right-aligned at the end of the corresponding line.
+		\item[firstline] Number of the first line of the text (default: 1).
+		\item[modulo] Frequency with which the line numbers are printed (default: 5).
+		\item[numberpos] Horizontal position of the line numbers (default: 0pt). Negative values move the numbers towards left, positive values towards right.
+	\end{description}
+	
+	Inside the argument of \verb|\theatre|, the following macros can be used in order to specify the characters' names. An example will be given in Section \ref{examples}, which hopefully clarifies the nuances.
+	\begin{description}[font=\normalfont]
+		\item[\texttt{\textbackslash speak\{}\emph{Name}\texttt{\}}] Specifies the character's name.
+		\item[\texttt{\textbackslash Speak\{}\emph{Name}\texttt{\}}] Specifies the character's name, but the words skips on a new line (useful for introducing new characters in greek theatre).
+		\item[\texttt{\textbackslash emispeak\{}\emph{Name}\texttt{\}\{}\emph{words}\texttt{\}}] Must be used when the words of the next character continues the verse of the current character.
+		\item[\texttt{\textbackslash emiSpeak\{}\emph{Name}\texttt{\}\{}\emph{words}\texttt{\}}] Must be used when the words of the next character continues the verse of the current character, but also the words of the current character must be on a new line.
+	\end{description}
+
+	Both in \verb|\theatre| and in \verb|\poetry|, the macro \verb|\note{|\emph{text}\verb|}|\marginpar{\texttt{\textbackslash note}} may be used for a note at the right margin of the line. This may be useful for customizing the line numbers in some section of the text, together with the commands \verb|\nolinenumbers| and \verb|\linenumbers[|\emph{number}\verb|]|, which interrupt and resume (starting from \emph{number}) the line numbering respectively.
+	
+	\newpage
+  
+  \section{Examples} \label{examples}
+	
+	Here is an example of custom numbering of lines inside the \verb|\poetry| macro.	
+	
+	\begin{verbatim}
+  \onequote[fontscale=1, right=200pt]{
+    \poetry[numbers=true, modulo=1, firstline=42]{
+      Roses are red,
+      
+      Violets are blue,
+      
+      \nolinenumbers
+      Sugar is sweet,\note{43b}
+      
+      \linenumbers[44]
+      And so are you.
+    }
+  }{}
+	\end{verbatim}
+	
+	\onequote[fontscale=1, right=200pt]{
+		\poetry[numbers=true, modulo=1, firstline=42]{
+			Roses are red,
+			
+			Violets are blue,
+			
+			\nolinenumbers
+			Sugar is sweet,\note{43b}
+			
+			\linenumbers[44]
+			And so are you.
+		}
+	}{}
+  
+  \bigskip
+  
+  Here is an example of various usages of the commands inside the \verb|\theatre| macro.
+  
+  \begin{verbatim}
+  \onequote{
+    \theatre[style=italian]{
+      \speak{Romeo}Roses are red,
+      \emispeak{Juliet}{Violets}
+      \speak{Romeo}are blue,
+      
+      Sugar is sweet,
+      \Speak{Juliet}And so are you.
+    }
+  }{}
+  \end{verbatim}
+  
+  \onequote{
+    \theatre[style=italian]{
+      \speak{Romeo}Roses are red,
+      \emispeak{Juliet}{Violets}
+      \speak{Romeo}are blue,
+      
+      Sugar is sweet,
+      \Speak{Juliet}And so are you.
+    }
+  }{}
+	
+	
+\end{document}
