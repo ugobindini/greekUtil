@@ -1,0 +1,304 @@
+%per fare accento grave nel greco {altgr + apostrofo}; stesso comando anche per fare l'inizio delle virgolette, che quindi vengono ``''. 
+%per fare la tilde (=accento circonflesso nel greco) = altgr+ì
+%\cite per avere tutta la referenza tra parentesi (quindi si usa all'interno del testo)
+%\citet per avere {NOME (anno, pagina)} (quindi si usa nelle note)
+
+
+%macro e comandi per filologia classica
+\usepackage{teubner}
+\usepackage{xkeyval}
+\usepackage{xparse}
+\usepackage{ifthen}
+\usepackage{etoolbox}
+\usepackage{marginnote}
+\usepackage{paracol}
+\usepackage{fp}
+\footnotelayout{m}%
+
+%Trucco per allineare le colonne: crea una riga invisibile
+\newcommand{\aligner}{\rule{0pt}{14pt}}
+
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{relsize}
+\usepackage{lipsum}
+
+% note a margine sempre sulla sinistra
+\makeatletter
+\patchcmd{\@mn@margintest}{\@tempswafalse}{\@tempswatrue}{}{}
+\patchcmd{\@mn@margintest}{\@tempswafalse}{\@tempswatrue}{}{}
+\reversemarginpar 
+
+% \PO: sigla POxy aka papiro di Ossirinco
+\newcommand{\PO}{\emph{POxy }}
+
+% spazi orizzontali per cambiare parola o verso nell'apparato.
+\newcommand{\Tab}{\hspace{1,5em}}
+\newcommand{\tab}{\hspace{1em}}
+
+% \g{}: scrivere in greco politonico, per caratteri speciali vedi teubner
+\newcommand{\g}[1]{\textDidot{\hyphenrules{polutonikogreek}#1}}
+
+% \latin{} per brevi(ssime) lettere/parole/frasi in caratteri latini all'interno di \g{}
+\newcommand{\latin}[1]{$\operatorname{#1}$}
+
+% \b = brevis, \l = longa (segni metrici). Da usare dentro \g{}
+\renewcommand{\l}{\longa}
+\renewcommand{\b}{\brevis}
+
+% \red{} colore testo rosso
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+
+% \acapo salta una riga
+\newcommand{\acapo}{\bigskip}
+
+
+\define@key{twoquote}{fontscale}[0.9]{\def\twoquote@fontscale{#1}}
+\define@key{twoquote}{top}[0pt]{\def\twoquote@top{#1}}
+\define@key{twoquote}{bottom}[0pt]{\def\twoquote@bottom{#1}}
+\define@key{twoquote}{middle}[\f@size pt]{\def\twoquote@middle{#1}}
+\define@key{twoquote}{left}[\parindent]{\def\twoquote@left{#1}}
+\define@key{twoquote}{right}[\parindent]{\def\twoquote@right{#1}}
+\define@key{twoquote}{gap}[\parindent]{\def\twoquote@gap{#1}}
+\define@key{twoquote}{ratio}[1]{\def\twoquote@ratio{#1}}
+
+% \twoquote[opzioni]{colonna1}{colonna2}{apparato} per citazioni su due colonne
+\newcommand{\twoquote}[4][]{%
+  \presetkeys{twoquote}{fontscale, top, bottom, middle, left, right, gap, ratio}{}%
+  \setkeys{twoquote}{#1}%
+  \vspace{\twoquote@top}%
+  \relscale{\twoquote@fontscale}%
+  \setlength{\columnsep}{0.05pt}%
+  \setcolumnwidth{\twoquote@left,\twoquote@ratio\fill,\twoquote@gap,\fill,\twoquote@right}%
+  \footnotelayout{m}%
+  \begin{paracol}{5}%
+    \setlength{\parindent}{0pt}%
+	\switchcolumn[1]*%
+    \aligner\ignorespaces#2%
+    \switchcolumn[3]%
+    \aligner\ignorespaces#3%
+  \end{paracol}%
+  \ifstrempty{#4}{}{%
+	\vspace{\twoquote@middle}%
+	\setlength{\columnsep}{0.05pt}%
+	\setcolumnwidth{\twoquote@left,\fill,\twoquote@right}%
+	\footnotelayout{m}%
+	\smaller%
+	\begin{paracol}{3}%
+	\setlength{\parindent}{0pt}%
+	\switchcolumn[1]*%
+	\ignorespaces#4%
+	\end{paracol}%
+	\larger%
+  }%
+  \FPdiv\twoquote@revertfontscale{1}{\twoquote@fontscale}%
+  \relscale{\twoquote@revertfontscale}%
+  \vspace{\twoquote@bottom}%
+}
+
+
+\define@key{quote}{fontscale}[0.9]{\def\quote@fontscale{#1}}
+\define@key{quote}{topspace}[0pt]{\def\quote@topspace{#1}}
+\define@key{quote}{bottomspace}[0pt]{\def\quote@bottomspace{#1}}
+\define@key{quote}{middle}[\f@size pt]{\def\quote@middle{#1}}
+\define@key{quote}{left}[2\parindent]{\def\quote@left{#1}}
+\define@key{quote}{right}[2\parindent]{\def\quote@right{#1}}
+
+% \quote[opzioni]{citazione}{apparato} per citazioni su una colonna
+\renewcommand{\quote}[3][]{%
+ \presetkeys{quote}{fontscale, topspace, bottomspace, middle, left, right}{}%
+ \setkeys{quote}{#1}%
+ \vspace{\quote@topspace}%
+ \relscale{\quote@fontscale}%
+ \setlength{\columnsep}{0.05pt}%
+ %Errore se left e right sono entrambi 0pt, aggiungo un epsilon
+ \setcolumnwidth{\quote@left,\fill,\quote@right}%
+ \footnotelayout{m}%
+ \begin{paracol}{3}%
+   \setlength{\parindent}{0pt}%
+   \switchcolumn[1]*%
+   \ignorespaces#2%
+   \ifstrempty{#3}{}{%
+     \vskip{\quote@middle}%
+     \smaller%
+     \ignorespaces#3%
+     \larger%
+   }%
+ \end{paracol}%
+ \FPdiv\quote@revertfontscale{1}{\quote@fontscale}%
+ \relscale{\quote@revertfontscale}%
+ \vspace{\quote@bottomspace}%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% I prossimi comandi sono da usare dentro un ambiente teatrale o poetico.
+
+% \note{} nota a margine (a destra)
+\newcommand{\note}[1]{\hfill\mbox{\smaller[2]#1}}
+
+% NON USARE
+\newcommand{\numprint}{\hfill\mbox{\smaller[2]\arabic{mustprint}}}
+\newcommand{\setprint}{\ifNUM\ifEMI\else\ifnum\numexpr(\thelinenum-((\thelinenum / \themodulo) * \themodulo))= 0\relax\setcounter{mustprint}{\thelinenum}\fi\fi\fi}
+
+% \v da mettere alla fine di un verso per far proseguire la numerazione e andare a capo, tra quadre eventualmente il numero da stampare
+\newlength{\v@oldparskip}
+
+\renewcommand{\v}[1][]{\EMIfalse%
+	\ifstrempty{#1}%
+		{\setprint\ifnum\numexpr\themustprint > 0\relax\numprint\setcounter{mustprint}{0}\fi}%
+		{\hfill\mbox{\smaller[2]#1}}%
+	\stepcounter{linenum}\par%
+}
+
+% \vv da mettere alla fine di un verso per far proseguire la numerazione e andare a capo lasciando uno spazio di fine-strofa, tra quadre eventualmente il numero da stampare
+\newcommand{\vv}[1][]{\EMIfalse%
+	\ifstrempty{#1}%
+		{\setprint\ifnum\numexpr\themustprint > 0\relax\numprint\setcounter{mustprint}{0}\fi}%
+		{\hfill\mbox{\smaller[2]#1}}%
+	\stepcounter{linenum}\medskip%
+}
+
+% \V fa proseguire la numerazione dei versi, ma non manda a capo (da usare all'interno di una riga)
+\newcommand{\V}{\EMIfalse\setprint\stepcounter{linenum}}
+
+% \w manda a capo senza aumentare la numerazione dei versi
+\newcommand{\w}{\EMIfalse\par}
+
+% \ind a inizio verso, indentazione singola
+\newcommand{\ind}{\hspace{15pt}}
+
+% \iind a inizio verso, indentazione doppia
+\newcommand{\iind}{\hspace{30pt}}
+
+% \speak{} = normale; \Speak{} = linea successiva; \parla{} = maiuscoletto; \Parla{} = maiuscoletto e linea successiva
+% \emi... = il verso prosegue nella battuta successiva (non mettere \v alla fine)
+
+\newcommand{\speak}[1]{\item[#1]\hspace{\currPos}\EMIfalse\setlength{\currPos}{0pt}\ignorespaces}
+\newcommand{\emispeak}[2]{\item[#1]\hspace{\currPos}\ignorespaces#2\EMItrue\setlength{\currPos}{\currPos + \widthof{#2}}}
+\newcommand{\Speak}[1]{\bigskip\item[#1]\item\hspace{\currPos}\setlength{\currPos}{0pt}\ignorespaces}
+\newcommand{\emiSpeak}[2]{\bigskip\item[#1]\item\hspace{\currPos}\ignorespaces#2\EMItrue\setlength{\currPos}{\currPos + \widthof{#2}}}
+
+\newcommand{\parla}[1]{\item[\smaller\textsc{#1}]\hspace{\currPos}\EMIfalse\setlength{\currPos}{0pt}\ignorespaces}
+\newcommand{\emiparla}[2]{\item[\smaller\textsc{#1}]\hspace{\currPos}\ignorespaces#2\EMItrue\setlength{\currPos}{\currPos + \widthof{#2}}}
+\newcommand{\Parla}[1]{\bigskip\item[\smaller\textsc{#1}]\item\hspace{\currPos}\setlength{\currPos}{0pt}\ignorespaces}
+\newcommand{\emiParla}[2]{\bigskip\item[\smaller\textsc{#1}]\item\hspace{\currPos}\ignorespaces#2\EMItrue\setlength{\currPos}{\currPos + \widthof{#2}}}
+
+% NON USARE
+\newlength{\currPos}
+\newcounter{linenum}
+\newcounter{modulo}
+\newcounter{mustprint}%0 = non devo stampare, altrimenti devo stampare il suo valore
+\newif\ifEMI
+\newif\ifNUM
+
+\define@key{theatron}{fontscale}[1]{\def\theatron@fontscale{#1}}
+\define@key{theatron}{top}[0pt]{\def\theatron@top{#1}}
+\define@key{theatron}{bottom}[0pt]{\def\theatron@bottom{#1}}
+\define@key{theatron}{middle}[\f@size pt]{\def\theatron@middle{#1}}
+\define@boolkey{theatron}{numbers}[false]{}
+\define@key{theatron}{modulo}[5]{\setcounter{modulo}{#1}}
+\define@key{theatron}{firstline}[1]{\def\theatron@firstline{#1}}
+
+% \theatron[opzioni]{testo}{apparato} per teatro greco (poco margine sx)
+\newcommand{\theatron}[3][]{%
+	\presetkeys{theatron}{fontscale, top, bottom, middle, numbers, modulo, firstline}{}%
+	\setkeys{theatron}{#1}%
+	\ifKV@theatron@numbers%
+	\NUMtrue\EMIfalse%
+	\else%
+	\NUMfalse%
+	\fi%
+  	\setlength{\parindent}{0pt}%
+  	\setlength{\currPos}{0pt}%
+  	\vspace{\theatron@top}%
+  	\relscale{\theatron@fontscale}%
+	\begin{description}[font=\normalfont, leftmargin=2em, labelwidth=2em, style=sameline, nosep]%
+	\setcounter{linenum}{\theatron@firstline}%
+	\ignorespaces#2\ignorespaces%
+	\end{description}%
+	%apparato
+	\ifstrempty{#3}{}{%
+		\vspace{\theatron@middle}%
+		\smaller%
+		\ignorespaces#3\ignorespaces%
+		\larger%
+	}%
+	\FPdiv\theatron@revertfontscale{1}{\theatron@fontscale}%
+	\relscale{\theatron@revertfontscale}%
+	\vspace{\theatron@bottom}%
+}
+
+\define@key{theatre}{fontscale}[1]{\def\theatre@fontscale{#1}}
+\define@key{theatre}{top}[0pt]{\def\theatre@top{#1}}
+\define@key{theatre}{bottom}[0pt]{\def\theatre@bottom{#1}}
+\define@key{theatre}{middle}[\f@size pt]{\def\theatre@middle{#1}}
+\define@boolkey{theatre}{numbers}[false]{}
+\define@key{theatre}{modulo}[5]{\setcounter{modulo}{#1}}
+\define@key{theatre}{firstline}[1]{\def\theatre@firstline{#1}}
+
+% \theatre{} per teatro in altre lingue
+\newcommand{\theatre}[3][]{%
+  \presetkeys{theatre}{fontscale, top, bottom, middle, numbers, modulo, firstline}{}%
+  \setkeys{theatre}{#1}%
+  \ifKV@theatre@numbers%
+  \NUMtrue\EMIfalse%
+  \else%
+  \NUMfalse%
+  \fi%
+  \setlength{\parindent}{0pt}%
+  \setlength{\currPos}{0pt}%
+  \vspace{\theatre@top}%
+  \relscale{\theatre@fontscale}%
+  \begin{description}[font=\normalfont, leftmargin=3em, labelwidth=3em, nosep, style=sameline]%
+  \setcounter{linenum}{\theatre@firstline}%
+  \ignorespaces#2\ignorespaces%
+  \end{description}%
+  %apparato
+  \ifstrempty{#3}{}{%
+	\vspace{\theatre@middle}%
+	\smaller%
+	\ignorespaces#3\ignorespaces%
+	\larger%
+  }%
+  \FPdiv\theatre@revertfontscale{1}{\theatre@fontscale}%
+  \relscale{\theatre@revertfontscale}%
+  \vspace{\theatre@bottom}%
+}
+
+\define@key{poetry}{fontscale}[1]{\def\poetry@fontscale{#1}}
+\define@key{poetry}{top}[0pt]{\def\poetry@top{#1}}
+\define@key{poetry}{bottom}[0pt]{\def\poetry@bottom{#1}}
+\define@key{poetry}{middle}[\f@size pt]{\def\poetry@middle{#1}}
+\define@boolkey{poetry}{numbers}[false]{}
+\define@key{poetry}{modulo}[5]{\setcounter{modulo}{#1}}
+\define@key{poetry}{firstline}[1]{\def\poetry@firstline{#1}}
+
+% \poetry[]{} per poesia
+\newcommand{\poetry}[3][]{%
+  \presetkeys{poetry}{fontscale, top, bottom, middle, numbers, modulo, firstline}{}%
+  \setkeys{poetry}{#1}%
+  \ifKV@poetry@numbers%
+  \NUMtrue\EMIfalse%
+  \else%
+  \NUMfalse%
+  \fi%
+  \setlength{\parindent}{0pt}%
+  \setlength{\currPos}{0pt}%
+  \setcounter{linenum}{\poetry@firstline}%
+  \vspace{\poetry@top}%
+  \relscale{\poetry@fontscale}%
+  \ignorespaces#2\ignorespaces%
+  %apparato
+  \ifstrempty{#3}{}{%
+  	\vspace{\poetry@middle}%
+  	\smaller%
+  	\ignorespaces#3\ignorespaces%
+  	\larger%
+  }%
+  \FPdiv\poetry@revertfontscale{1}{\poetry@fontscale}%
+  \relscale{\poetry@revertfontscale}%
+  \vspace{\poetry@bottom}%
+}
+
+\makeatother
