@@ -1,0 +1,280 @@
+%per fare accento grave nel greco {altgr + apostrofo}; stesso comando anche per fare l'inizio delle virgolette, che quindi vengono ``''. 
+%per fare la tilde (=accento circonflesso nel greco) = altgr+ì
+%\cite per avere tutta la referenza tra parentesi (quindi si usa all'interno del testo)
+%\citet per avere {NOME (anno, pagina)} (quindi si usa nelle note)
+
+
+%macro e comandi per filologia classica
+
+%Author: Ugo Bindini (2017-today)
+
+\RequirePackage{teubner}
+\RequirePackage{xkeyval}
+\RequirePackage{marginnote}
+\RequirePackage{paracol}
+\RequirePackage{lineno}
+\RequirePackage{setspace}
+\RequirePackage{pdfrender}
+\RequirePackage{xifthen}
+\RequirePackage{etoolbox}
+\RequirePackage{fp}
+\RequirePackage{calc}
+
+\RequirePackage{enumitem}
+\RequirePackage{relsize}
+
+\renewcommand\linenumberfont{\fontfamily{urw-garamond}\selectfont\smaller[2]}
+
+\footnotelayout{m}
+
+% note a margine sempre sulla sinistra
+\makeatletter
+\patchcmd{\@mn@margintest}{\@tempswafalse}{\@tempswatrue}{}{}
+\patchcmd{\@mn@margintest}{\@tempswafalse}{\@tempswatrue}{}{}
+\reversemarginpar 
+
+% spazi orizzontali per cambiare parola o verso nell'apparato.
+\newcommand{\tab}{| }%{\hspace{1em}}
+
+\def\apparatusText{}
+\newif\ifFIRSTAPPNOTE
+\newif\ifAPPARATUS
+\global\APPARATUSfalse
+\global\FIRSTAPPNOTEtrue
+\newcommand{\appnote}[2][]{%
+	\ifFIRSTAPPNOTE%
+	\g@addto@macro\apparatusText{\bfseries}%
+	\else%
+	\g@addto@macro\apparatusText{$\lVert$ \bfseries}%
+	\fi%
+	\ifstrempty{#1}{\xappto\apparatusText{\arabic{linenumber}}}{\g@addto@macro\apparatusText{#1}}%
+	\g@addto@macro\apparatusText{\normalfont ~#2 }%
+	\global\FIRSTAPPNOTEfalse%
+	\global\APPARATUStrue%
+}
+
+\newcommand{\clearApparatus}{\renewcommand{\apparatusText}{}\global\FIRSTAPPNOTEtrue\global\APPARATUSfalse}
+
+% \g{}: scrivere in greco politonico, per caratteri speciali vedi teubner
+\newcommand{\g}[1]{\textDidot{\hyphenrules{polutonikogreek}#1}}
+
+% \boldg[boldness]{testo}: scrivere in greco come \g, ma in bold. Attenzione: si tratta di un fake-bold
+\newcommand{\boldg}[2][0.5]{%
+	\textpdfrender{TextRenderingMode=2, LineWidth=#1}{\g{#2}}%
+}
+
+% \latin{} per brevi(ssime) lettere/parole/frasi in caratteri latini all'interno di \g{}
+\newcommand{\latin}[1]{$\operatorname{#1}$}
+
+% \b = brevis, \l = longa (segni metrici)
+\renewcommand{\l}{\longa}
+\renewcommand{\b}{\brevis}
+
+% \red{} colore testo rosso
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+
+
+\define@key{onequote}{fontscale}[0.9]{\def\onequote@fontscale{#1}}
+\define@key{onequote}{top}[6pt]{\def\onequote@top{#1}}
+\define@key{onequote}{bottom}[6pt]{\def\onequote@bottom{#1}}
+\define@key{onequote}{middle}[6pt]{\def\onequote@middle{#1}}
+\define@key{onequote}{left}[2\parindent]{\def\onequote@left{#1}}
+\define@key{onequote}{right}[2\parindent]{\def\onequote@right{#1}}
+
+% \onequote[opzioni]{testo} per citazioni su una colonna
+\newcommand{\onequote}[2][]{%
+	\presetkeys{onequote}{fontscale, top, bottom, middle, left, right}{}%
+	\setkeys{onequote}{#1}%
+	\vspace{\onequote@top}%
+	\relscale{\onequote@fontscale}%
+	\setlength{\columnsep}{0.05pt}%
+	%Errore se left e right sono entrambi 0pt, aggiungo un epsilon
+	\setcolumnwidth{\onequote@left,\fill,\onequote@right}%
+	\begin{paracol}{3}%
+		\setlength{\parindent}{0pt}%
+		\setlength{\parskip}{0pt}%
+		\switchcolumn[1]*%
+		\ignorespaces#2%
+		\ifAPPARATUS%
+			\par%
+			\nolinenumbers%
+			\vspace{\onequote@middle}%
+			\smaller%
+			\apparatusText%
+			\clearApparatus%
+			\larger%
+		\fi
+	\end{paracol}%
+	\FPdiv\onequote@revertfontscale{1}{\onequote@fontscale}%
+	\relscale{\onequote@revertfontscale}%
+	\vspace{\onequote@bottom}%
+}
+
+
+\define@key{twoquote}{fontscale}[0.9]{\def\twoquote@fontscale{#1}}
+\define@key{twoquote}{top}[6pt]{\def\twoquote@top{#1}}
+\define@key{twoquote}{bottom}[6pt]{\def\twoquote@bottom{#1}}
+\define@key{twoquote}{middle}[6pt]{\def\twoquote@middle{#1}}
+\define@key{twoquote}{left}[\parindent]{\def\twoquote@left{#1}}
+\define@key{twoquote}{right}[\parindent]{\def\twoquote@right{#1}}
+\define@key{twoquote}{gap}[\parindent]{\def\twoquote@gap{#1}}
+\define@key{twoquote}{ratio}[1]{\def\twoquote@ratio{#1}}
+
+% \twoquote[opzioni]{colonna1}{colonna2} per citazioni su due colonne
+\newcommand{\twoquote}[3][]{%
+  \presetkeys{twoquote}{fontscale, top, bottom, middle, left, right, gap, ratio}{}%
+  \setkeys{twoquote}{#1}%
+  \vspace{\twoquote@top}%
+  \relscale{\twoquote@fontscale}%
+  \setlength{\columnsep}{0.05pt}%
+  \setcolumnwidth{\twoquote@left,\twoquote@ratio\fill,\twoquote@gap,\fill,\twoquote@right}%
+  \begin{paracol}{5}%
+    \setlength{\parindent}{0pt}%
+	\setlength{\parskip}{0pt}%
+	\switchcolumn[1]*%
+    \ignorespaces#2%
+    \switchcolumn[3]%
+    \ignorespaces#3%
+  \end{paracol}%
+  \ifAPPARATUS%
+	\par%
+	\nolinenumbers%
+	\vspace{\twoquote@middle}%
+	\setlength{\columnsep}{0.05pt}%
+	\setcolumnwidth{\twoquote@left,\fill,\twoquote@right}%
+	\footnotelayout{m}%
+	\smaller%
+	\begin{paracol}{3}%
+	\setlength{\parindent}{0pt}%
+	\switchcolumn[1]*%
+	\apparatusText%
+	\end{paracol}%
+	\clearApparatus%
+	\larger%
+  \fi%
+  \FPdiv\twoquote@revertfontscale{1}{\twoquote@fontscale}%
+  \relscale{\twoquote@revertfontscale}%
+  \vspace{\twoquote@bottom}%
+}
+
+
+\newcommand{\apparatus}{%
+	\smaller%
+	\apparatusText%
+	\clearApparatus%
+	\larger%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% I prossimi comandi sono da usare dentro un ambiente teatrale o poetico.
+
+% \note{} nota a margine (a destra)
+\newcommand{\note}[1]{\hfill\mbox{\smaller[2]#1}}
+
+% \ind a inizio verso, indentazione singola
+\newcommand{\ind}{\hspace{15pt}}
+
+% \iind a inizio verso, indentazione doppia
+\newcommand{\iind}{\hspace{30pt}}
+
+
+\newcommand{\speak}[1]{\item[\theatre@itemfont #1]\hspace{\currPos}\setlength{\currPos}{0pt}\ignorespaces}
+\newcommand{\emispeak}[2]{\item[\theatre@itemfont #1]\hspace{\currPos}\ignorespaces#2\setlength{\currPos}{\currPos + \widthof{#2}}}
+\newcommand{\Speak}[1]{\item[\theatre@itemfont #1]\item\hspace{\currPos}\setlength{\currPos}{0pt}\ignorespaces}
+\newcommand{\emiSpeak}[2]{\item[\theatre@itemfont #1]\item\hspace{\currPos}\ignorespaces#2\setlength{\currPos}{\currPos + \widthof{#2}}}
+
+% NON USARE
+\newlength{\currPos}
+
+% Switch implementation
+\newcommand{\ifequals}[3]{\ifthenelse{\equal{#1}{#2}}{#3}{}}
+\newcommand{\case}[2]{#1 #2} % Dummy, so \renewcommand has something to overwrite...
+\newenvironment{switch}[1]{\renewcommand{\case}{\ifequals{#1}}}{}
+
+% Example: Pick color by ID
+\newcommand{\incolor}[2]{
+  \begin{switch}{#1}
+    \case{1}{\color{red}}
+    \case{2}{\color{blue}}
+    \case{3}{\color{green}}
+    \case{4}{\color{black}}
+    #2
+  \end{switch}
+}
+
+\define@key{theatre}{style}[greek]{\def\theatre@style{#1}}
+\define@key{theatre}{fontscale}[1]{\def\theatre@fontscale{#1}}
+\define@key{theatre}{top}[0pt]{\def\theatre@top{#1}}
+\define@key{theatre}{bottom}[0pt]{\def\theatre@bottom{#1}}
+\define@key{theatre}{indent}[2em]{\def\theatre@indent{#1}}
+\define@boolkey{theatre}{numbers}[false]{}
+\define@key{theatre}{modulo}[5]{\def\theatre@modulo{#1}}
+\define@key{theatre}{firstline}[1]{\def\theatre@firstline{#1}}
+\define@key{theatre}{numberpos}[0pt]{\def\theatre@numberpos{#1}}
+
+% \theatre[opzioni]{testo} per teatro
+\newcommand{\theatre}[2][]{%
+  \presetkeys{theatre}{style, fontscale, top, bottom, indent, numbers, modulo, firstline, numberpos}{}%
+  \setkeys{theatre}{#1}%
+  \def\theatre@itemfont{}%
+  \ifthenelse{\equal{\theatre@style}{italian}}{\def\theatre@itemfont{\smaller\scshape}}{}%
+  \setlength{\parindent}{0pt}%
+  \setlength{\currPos}{0pt}%
+  \vspace{\theatre@top}%
+  \relscale{\theatre@fontscale}%
+  \ifKV@theatre@numbers%
+  \setlength{\linenumbersep}{\theatre@numberpos}%
+  \setlength{\linenumberwidth}{0pt}%
+  \begin{runninglinenumbers}[\theatre@firstline]%
+  	\rightlinenumbers%
+  	\modulolinenumbers[\theatre@modulo]%
+  \fi%
+  \begin{description}[font=\normalfont, leftmargin=\theatre@indent, labelwidth=\theatre@indent, nosep, style=sameline]%
+  \ignorespaces#2\ignorespaces%
+  \end{description}%
+  \ifKV@theatre@numbers%
+  \end{runninglinenumbers}%
+  \setlength{\linenumbersep}{10pt}%
+  \setlength{\linenumberwidth}{10pt}%
+  \fi%
+  \FPdiv\theatre@revertfontscale{1}{\theatre@fontscale}%
+  \relscale{\theatre@revertfontscale}%
+  \vspace{\theatre@bottom}%
+}
+
+\define@key{poetry}{fontscale}[1]{\def\poetry@fontscale{#1}}
+\define@key{poetry}{top}[0pt]{\def\poetry@top{#1}}
+\define@key{poetry}{bottom}[0pt]{\def\poetry@bottom{#1}}
+\define@boolkey{poetry}{numbers}[false]{}
+\define@key{poetry}{modulo}[5]{\def\poetry@modulo{#1}}
+\define@key{poetry}{firstline}[1]{\def\poetry@firstline{#1}}
+\define@key{poetry}{numberpos}[0pt]{\def\poetry@numberpos{#1}}
+
+% \poetry[opzioni]{testo} per poesia
+\newcommand{\poetry}[2][]{%
+  \presetkeys{poetry}{fontscale, top, bottom, numbers, modulo, firstline, numberpos}{}%
+  \setkeys{poetry}{#1}%
+  \setlength{\parindent}{0pt}%
+  \setlength{\currPos}{0pt}%
+  \vspace{\poetry@top}%
+  \relscale{\poetry@fontscale}%
+  \ifKV@poetry@numbers%
+  \setlength{\linenumbersep}{\poetry@numberpos}%
+  \setlength{\linenumberwidth}{0pt}%
+  \begin{runninglinenumbers}[\poetry@firstline]%
+  	\rightlinenumbers%
+  	\modulolinenumbers[\poetry@modulo]%
+  \fi%
+  \ignorespaces#2\ignorespaces%
+  \ifKV@poetry@numbers%
+  \end{runninglinenumbers}%
+  \setlength{\linenumbersep}{10pt}%
+  \setlength{\linenumberwidth}{10pt}%
+  \fi
+  \FPdiv\poetry@revertfontscale{1}{\poetry@fontscale}%
+  \relscale{\poetry@revertfontscale}%
+  \vspace{\poetry@bottom}%
+}
+
+\makeatother
